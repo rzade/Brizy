@@ -701,3 +701,13 @@
 
 // Sidebar Options
 @import "sidebar/sidebar-options";
+
+// TEMP
+.brz-ed-sidebar-block-item {
+  &.is-simple-global-block {
+    background-color: blue;
+  }
+  &.is-condition-block {
+    background-color: red;
+  }
+}

@@ -8,19 +8,32 @@ import {
 } from "react-sortable-hoc";
 import { removeAt, insert } from "timm";
 import EditorIcon from "visual/component/EditorIcon";
-import { pageAssembledSelector } from "visual/redux/selectors";
-import { removeBlock, reorderBlocks } from "visual/redux/actions";
+import {
+  pageBlocksAssembledSelector,
+  globalBlocksSelector
+} from "visual/redux/selectors";
+import { removeBlock, reorderBlocks } from "visual/redux/actions2";
 import { t } from "visual/utils/i18n";
 import { IS_GLOBAL_POPUP } from "visual/utils/models";
 import BlockThumbnail from "./BlockThumbnail";
+
+import { getStore } from "visual/redux/store";
 
 const DragHandle = SortableHandle(({ item }) => (
   <BlockThumbnail blockData={item} />
 ));
 
 const SortableItem = SortableElement(({ item, onRemove }) => {
+  // ! TEMP
+  const globalBlocksKeys = Object.keys(
+    globalBlocksSelector(getStore().getState())
+  );
+  const className = classnames("brz-ed-sidebar-block-item", {
+    "is-condition-block": globalBlocksKeys.includes(item.value._id)
+  });
+
   return (
-    <div className="brz-ed-sidebar-block-item">
+    <div className={className}>
       <DragHandle item={item} />
       <div className="brz-ed-sidebar-block-remove" onClick={onRemove}>
         <EditorIcon icon="nc-circle-remove-2" className="brz-ed-bar-icon" />
@@ -74,9 +87,9 @@ class DrawerComponent extends React.Component {
       };
     }
 
-    if (props.page.data.items !== state.blocks) {
+    if (props.pageBlocks !== state.blocks) {
       return {
-        blocks: props.page.data.items || []
+        blocks: props.pageBlocks || []
       };
     }
 
@@ -133,7 +146,11 @@ class DrawerComponent extends React.Component {
   };
 
   handleItemRemove = index => {
-    this.props.dispatch(removeBlock({ index }));
+    const {
+      value: { _id }
+    } = this.state.blocks[index];
+
+    this.props.dispatch(removeBlock({ index, id: _id }));
   };
 
   render() {
@@ -158,7 +175,7 @@ class DrawerComponent extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  page: pageAssembledSelector(state)
+  pageBlocks: pageBlocksAssembledSelector(state)
 });
 
 export const BlocksSortable = {
