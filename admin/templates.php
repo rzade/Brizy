@@ -482,8 +482,10 @@ class Brizy_Admin_Templates {
 
 
 		$compiled_page = self::getTemplate()->get_compiled_page();
+		$templateHead  = $compiled_page->get_head();
 
-		$head = apply_filters( 'brizy_content', $compiled_page->get_head(), Brizy_Editor_Project::get(), $post, 'head' );
+		$templateHead = apply_filters( 'brizy_add_page_assets', $templateHead, self::getTemplate(), 'styles' );
+		$head         = apply_filters( 'brizy_content', $templateHead, Brizy_Editor_Project::get(), $post, 'head' );
 		?>
         <!-- BRIZY HEAD -->
 		<?php echo $head; ?>
@@ -514,7 +516,10 @@ class Brizy_Admin_Templates {
 
 		$compiled_page = self::getTemplate()->get_compiled_page();
 
-		$content = apply_filters( 'brizy_content', $compiled_page->get_body(), Brizy_Editor_Project::get(), $post, 'body' );
+		$content = $compiled_page->get_body();
+
+		$content = apply_filters( 'brizy_add_page_assets', $content, self::getTemplate(), 'scripts' );
+		$content = apply_filters( 'brizy_content', $content, Brizy_Editor_Project::get(), $post, 'body' );
 
 		echo do_shortcode( $content );
 	}
@@ -665,14 +670,14 @@ class Brizy_Admin_Templates {
 
 					$array = get_posts( [
 						'post_status' => 'publish',
-						'tax_query' => array(
+						'tax_query'   => array(
 							array(
 								'taxonomy' => $term->taxonomy,
-								'field' => 'term_id',
-								'terms' => $term->term_id,
+								'field'    => 'term_id',
+								'terms'    => $term->term_id,
 							)
 						)
-                    ] );
+					] );
 
 					return array_pop( $array );
 					break;
